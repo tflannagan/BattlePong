@@ -4,6 +4,7 @@
     <title>BattlePong | Ty</title>
     <!-- <link rel="canonical" href="https://pong-wars.koenvangilst.nl/" /> -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <link rel="icon" type="image" href="favicon.ico">
     <style>
       html {
         height: 100%;
@@ -88,7 +89,7 @@
     <div id="container">
       <canvas id="pongCanvas" width="800" height="800"></canvas>
       <div id="score"></div>
-      <div id="highScoreCharacter">On Top: </div>
+      <div id="highScoreCharacter">⭐ </div>
       <div id="highScore">High Score: 0</div>
       
       <a href="#" id="resetHighScore" title="Reset High Score"><span class="material-symbols-outlined">
@@ -297,7 +298,7 @@
             // Safely update the "On Top" display
             const onTopElement = document.getElementById('onTop');
             if (onTopElement && highestScoringCharacter) {
-              onTopElement.textContent = `On Top: ${highestScoringCharacter} (${highestIndividualScore})`;
+              onTopElement.textContent = `⭐ ${highestScoringCharacter} (${highestIndividualScore})`;
             }
           
             if (highestIndividualScore > highScore) {
@@ -312,7 +313,7 @@
             highScore = newHighScore;
             localStorage.setItem(highScoreKey, highScore);
             highScoreElement.textContent = `High Score: ${highScore}`;
-            document.getElementById('highScoreCharacter').textContent = `On Top: ${highScorerCharacter}`;
+            document.getElementById('highScoreCharacter').textContent = `⭐ ${highScorerCharacter}`;
           }
     
     function displayEndGameNotification(winner) {
@@ -384,7 +385,7 @@
       // Assuming the logic to determine the current top scorer
       // For example, it could be the first character at the start
       let currentTopScorer = characterNames[Object.keys(colorPalette)[0]] || 'None';
-      document.getElementById('onTop').textContent = `On Top: ${currentTopScorer}`;
+      document.getElementById('onTop').textContent = `⭐ ${currentTopScorer}`;
   }
     function resetHighScore() {
       highScore = 0;
