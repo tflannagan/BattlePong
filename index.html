@@ -101,364 +101,374 @@
         <a href="https://github.com/tflannagan">github</a>
       </p>
     </div>
-  </body>
-
-  <script>
-// Global Variable Declarations
-    const colorPalette = {
-      ArcticPowder: "#F1F6F4",
-      MysticMint: "#D9E8E3",
-      Forsythia: "#FFC801",
-      DeepSaffron: "#FF9932",
-      NocturnalExpedition: "#114C5A",
-      OceanicNoir: "#172B36",
-      Crimson: "#DC143C",
-      CobaltBlue: "#0047AB",
-      Breeze: "#42FFFC"
-    };
-    const characterNames = {
-      ArcticPowder: "Neo",
-      MysticMint: "Vega",
-      Forsythia: "Blade",
-      DeepSaffron: "Cypher",
-      NocturnalExpedition: "Astra",
-      OceanicNoir: "Zion",
-      Crimson: "Raven",
-      CobaltBlue: "Echo",
-      Breeze: "Leon"
-    };
-    const powerUps = {
-      speedUp: { effect: 'speedUp', color: '#FFD700' },
-      explosion: { effect: 'explosion', color: '#FF6347' },
-      virus: { effect: 'virus', color: '#32CD32' }
-    };
-  
-    const canvas = document.getElementById("pongCanvas");
-    const ctx = canvas.getContext("2d");
-    const scoreElement = document.getElementById("score");
-  
-    const ballConfigurations = [
-      { color: colorPalette.ArcticPowder, ballColor: colorPalette.OceanicNoir },
-      { color: colorPalette.OceanicNoir, ballColor: colorPalette.ArcticPowder },
-      { color: colorPalette.NocturnalExpedition, ballColor: colorPalette.Breeze },
-      { color: colorPalette.Breeze, ballColor: colorPalette.NocturnalExpedition }
-    ];
-    const highScoreKey = 'pongGameHighScore';
-    let highScore = parseInt(localStorage.getItem(highScoreKey)) || 0;
-    const highScoreElement = document.getElementById('highScore');
-  
-    const SQUARE_SIZE = 25;
-    const numSquaresX = canvas.width / SQUARE_SIZE;
-    const numSquaresY = canvas.height / SQUARE_SIZE;
-    
-    let squares = [];
-  
-    // Initialize squares with equal distribution
-    for (let i = 0; i < numSquaresX; i++) {
-    squares[i] = [];
-    for (let j = 0; j < numSquaresY; j++) {
-      const index = Math.floor((i / numSquaresX) * ballConfigurations.length);
-      squares[i][j] = ballConfigurations[index].color;
-    }
-  }
-  
-    let balls = [
-    { x: canvas.width / 4, y: canvas.height / 2, dx: 12.5, dy: -12.5, speedUpTimeout: null, mass: 1 },
-    { x: (canvas.width / 4) * 3, y: canvas.height / 2, dx: -12.5, dy: 12.5, speedUpTimeout: null, mass: 1 },
-    { x: canvas.width / 2, y: canvas.height / 4, dx: 10, dy: 10, speedUpTimeout: null, mass: 1 },
-    { x: canvas.width / 2, y: (canvas.height / 4) * 3, dx: -10, dy: -10, speedUpTimeout: null, mass: 1 }
-  ];
-    
-    let powerUpLocations = [];
-
-// Utility Functions
-    function randomNum(min, max) {
-  return Math.random() * (max - min) + min;
-}
-
-// Core Game Functions
-    function spawnPowerUps() {
-      powerUpLocations = []; // Clear existing power-ups
-    for (let i = 0; i < 15; i++) { // Spawn 10 power-ups
-    const powerUpType = Object.keys(powerUps)[Math.floor(Math.random() * Object.keys(powerUps).length)];
-    const x = Math.floor(Math.random() * numSquaresX) * SQUARE_SIZE;
-    const y = Math.floor(Math.random() * numSquaresY) * SQUARE_SIZE;
-    powerUpLocations.push({ x, y, type: powerUps[powerUpType] });
-  }
-  }
-  
-    function applyPowerUpEffect(ball, effect) {
-      switch (effect) {
-        case 'speedUp':
-          // Cancel any existing speedUp timeout
-          clearTimeout(ball.speedUpTimeout);
-    
-          // Store the original speed and color
-          const originalSpeed = { dx: ball.dx, dy: ball.dy };
-          const originalColor = ball.ballColor; // Store the original ball color
-    
-          // Increase speed
-          ball.dx *= 2.5;
-          ball.dy *= 2.5;
-    
-          // Temporarily change the ball's color to visually indicate the power-up
-          ball.ballColor = '#FFD700'; // Example: Gold color for speedUp effect
-    
-          // Set a timeout to revert the speed and color after the effect duration
-          ball.speedUpTimeout = setTimeout(() => {
-            ball.dx = originalSpeed.dx;
-            ball.dy = originalSpeed.dy;
-            ball.ballColor = originalColor; // Revert to original color
-          }, 5000); // Adjust the duration as needed
-          break;
-        // ...
-      }
-    }
-
-    function drawBall(ball, color) {
-      ctx.beginPath();
-      ctx.arc(ball.x, ball.y, SQUARE_SIZE / 2, 0, Math.PI * 2, false);
-      ctx.fillStyle = color;
-      ctx.fill();
-      ctx.closePath();
-    }
-  
-    function drawSquares() {
-      for (let i = 0; i < numSquaresX; i++) {
-        for (let j = 0; j < numSquaresY; j++) {
-          ctx.fillStyle = squares[i][j];
-          ctx.fillRect(i * SQUARE_SIZE, j * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
+    <script>
+      // Global Variable Declarations
+          const colorPalette = {
+            ArcticPowder: "#F1F6F4",
+            MysticMint: "#D9E8E3",
+            Forsythia: "#FFC801",
+            DeepSaffron: "#FF9932",
+            NocturnalExpedition: "#114C5A",
+            OceanicNoir: "#172B36",
+            Crimson: "#DC143C",
+            CobaltBlue: "#0047AB",
+            Breeze: "#42FFFC"
+          };
+          const characterNames = {
+            ArcticPowder: "Neo",
+            MysticMint: "Vega",
+            Forsythia: "Blade",
+            DeepSaffron: "Cypher",
+            NocturnalExpedition: "Astra",
+            OceanicNoir: "Zion",
+            Crimson: "Raven",
+            CobaltBlue: "Echo",
+            Breeze: "Leon"
+          };
+          const powerUps = {
+            speedUp: { effect: 'speedUp', color: '#FFD700' },
+            explosion: { effect: 'explosion', color: '#FF6347' },
+            virus: { effect: 'virus', color: '#32CD32' }
+          };
+        
+          const canvas = document.getElementById("pongCanvas");
+          const ctx = canvas.getContext("2d");
+          const scoreElement = document.getElementById("score");
+        
+          const ballConfigurations = [
+            { color: colorPalette.ArcticPowder, ballColor: colorPalette.OceanicNoir },
+            { color: colorPalette.OceanicNoir, ballColor: colorPalette.ArcticPowder },
+            { color: colorPalette.NocturnalExpedition, ballColor: colorPalette.Breeze },
+            { color: colorPalette.Breeze, ballColor: colorPalette.NocturnalExpedition }
+          ];
+          const highScoreKey = 'pongGameHighScore';
+          let highScore = parseInt(localStorage.getItem(highScoreKey)) || 0;
+          const highScoreElement = document.getElementById('highScore');
+        
+          const SQUARE_SIZE = 25;
+          const numSquaresX = canvas.width / SQUARE_SIZE;
+          const numSquaresY = canvas.height / SQUARE_SIZE;
+          
+          let squares = [];
+        
+          // Initialize squares with equal distribution
+          for (let i = 0; i < numSquaresX; i++) {
+          squares[i] = [];
+          for (let j = 0; j < numSquaresY; j++) {
+            const index = Math.floor((i / numSquaresX) * ballConfigurations.length);
+            squares[i][j] = ballConfigurations[index].color;
+          }
         }
+        
+          let balls = [
+          { x: canvas.width / 4, y: canvas.height / 2, dx: 12.5, dy: -12.5, speedUpTimeout: null, mass: 1 },
+          { x: (canvas.width / 4) * 3, y: canvas.height / 2, dx: -12.5, dy: 12.5, speedUpTimeout: null, mass: 1 },
+          { x: canvas.width / 2, y: canvas.height / 4, dx: 10, dy: 10, speedUpTimeout: null, mass: 1 },
+          { x: canvas.width / 2, y: (canvas.height / 4) * 3, dx: -10, dy: -10, speedUpTimeout: null, mass: 1 }
+        ];
+          
+          let powerUpLocations = [];
+      
+      // Utility Functions
+          function randomNum(min, max) {
+        return Math.random() * (max - min) + min;
       }
-    }
-
-    function updateSquareAndBounce(ball, config) {
-      let updatedDx = ball.dx;
-      let updatedDy = ball.dy;
-  
-      for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 4) {
-        let checkX = ball.x + Math.cos(angle) * (SQUARE_SIZE / 2);
-        let checkY = ball.y + Math.sin(angle) * (SQUARE_SIZE / 2);
-  
-        let i = Math.floor(checkX / SQUARE_SIZE);
-        let j = Math.floor(checkY / SQUARE_SIZE);
-  
-        if (i >= 0 && i < numSquaresX && j >= 0 && j < numSquaresY) {
-          if (squares[i][j] !== config.color) {
+      
+      // Core Game Functions
+          function spawnPowerUps() {
+            powerUpLocations = []; // Clear existing power-ups
+          for (let i = 0; i < 15; i++) { // Spawn 10 power-ups
+          const powerUpType = Object.keys(powerUps)[Math.floor(Math.random() * Object.keys(powerUps).length)];
+          const x = Math.floor(Math.random() * numSquaresX) * SQUARE_SIZE;
+          const y = Math.floor(Math.random() * numSquaresY) * SQUARE_SIZE;
+          powerUpLocations.push({ x, y, type: powerUps[powerUpType] });
+        }
+        }
+        
+          function applyPowerUpEffect(ball, effect) {
+            switch (effect) {
+              case 'speedUp':
+                // Cancel any existing speedUp timeout
+                clearTimeout(ball.speedUpTimeout);
+          
+                // Store the original speed and color
+                const originalSpeed = { dx: ball.dx, dy: ball.dy };
+                const originalColor = ball.ballColor; // Store the original ball color
+          
+                // Increase speed
+                ball.dx *= 2.5;
+                ball.dy *= 2.5;
+          
+                // Temporarily change the ball's color to visually indicate the power-up
+                ball.ballColor = '#FFD700';
+                // Set a timeout to revert the speed and color after the effect duration
+                ball.speedUpTimeout = setTimeout(() => {
+                  ball.dx = originalSpeed.dx;
+                  ball.dy = originalSpeed.dy;
+                  ball.ballColor = originalColor; // Revert to original color
+                }, 5000); // Adjust the duration as needed
+                break;
             
-            squares[i][j] = config.color;
-
-           
-  
-            if (Math.abs(Math.cos(angle)) > Math.abs(Math.sin(angle))) {
-              updatedDx = -updatedDx;
-            } else {
-              updatedDy = -updatedDy;
             }
-  
-            updatedDx += randomNum(-0.01, 0.01);
-            updatedDy += randomNum(-0.01, 0.01);
           }
-        }
-      }
-            // Check for collision with invisible power-ups
-            powerUpLocations.forEach((powerUp, index) => {
-              if (Math.hypot(ball.x - powerUp.x, ball.y - powerUp.y) < SQUARE_SIZE / 2) {
-                applyPowerUpEffect(ball, powerUp.type.effect);
-                powerUpLocations.splice(index, 1); // Remove the power-up after activation
-              }
-            });
-                return { dx: updatedDx, dy: updatedDy };
+      
+          function drawBall(ball, color) {
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, SQUARE_SIZE / 2, 0, Math.PI * 2, false);
+            ctx.fillStyle = color;
+            ctx.fill();
+            ctx.closePath();
           }
-    
-    function updateScoreElement() {
-            let highestIndividualScore = 0;
-            let highestScoringCharacter = '';
-          
-            let scores = ballConfigurations.map(config => {
-              const character = characterNames[Object.keys(colorPalette).find(key => colorPalette[key] === config.color)];
-              const score = squares.flat().filter(color => color === config.color).length;
-          
-              if (score > highestIndividualScore) {
-                highestIndividualScore = score;
-                highestScoringCharacter = character;
+        
+          function drawSquares() {
+            for (let i = 0; i < numSquaresX; i++) {
+              for (let j = 0; j < numSquaresY; j++) {
+                ctx.fillStyle = squares[i][j];
+                ctx.fillRect(i * SQUARE_SIZE, j * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
               }
-          
-              return { character, score, color: config.color };
-            });
-
-            // Check for balls to eliminate
-              scores.forEach(score => {
-                const ballIndex = balls.findIndex(ball => ball.color === score.color);
-                if (ballIndex !== -1 && !balls[ballIndex].eliminated && score.score < 200) {
-                    eliminateBall(ballIndex);
+            }
+          }
+      
+          function updateSquareAndBounce(ball, config) {
+            let updatedDx = ball.dx;
+            let updatedDy = ball.dy;
+        
+            for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 4) {
+              let checkX = ball.x + Math.cos(angle) * (SQUARE_SIZE / 2);
+              let checkY = ball.y + Math.sin(angle) * (SQUARE_SIZE / 2);
+        
+              let i = Math.floor(checkX / SQUARE_SIZE);
+              let j = Math.floor(checkY / SQUARE_SIZE);
+        
+              if (i >= 0 && i < numSquaresX && j >= 0 && j < numSquaresY) {
+                if (squares[i][j] !== config.color) {
+                  
+                  squares[i][j] = config.color;
+      
+                 
+        
+                  if (Math.abs(Math.cos(angle)) > Math.abs(Math.sin(angle))) {
+                    updatedDx = -updatedDx;
+                  } else {
+                    updatedDy = -updatedDy;
+                  }
+        
+                  updatedDx += randomNum(-0.01, 0.01);
+                  updatedDy += randomNum(-0.01, 0.01);
                 }
-            });
-                    
-            // Safely update the "On Top" display
-            const onTopElement = document.getElementById('onTop');
-            if (onTopElement && highestScoringCharacter) {
-              onTopElement.textContent = `⭐ ${highestScoringCharacter} (${highestIndividualScore})`;
+              }
             }
+                  // Check for collision with invisible power-ups
+                  powerUpLocations.forEach((powerUp, index) => {
+                    if (Math.hypot(ball.x - powerUp.x, ball.y - powerUp.y) < SQUARE_SIZE / 2) {
+                      applyPowerUpEffect(ball, powerUp.type.effect);
+                      powerUpLocations.splice(index, 1); // Remove power-up after activation
+                    }
+                  });
+                      return { dx: updatedDx, dy: updatedDy };
+                }
           
-            if (highestIndividualScore > highScore) {
-              updateHighScore(highestIndividualScore, highestScoringCharacter);
+          function updateScoreElement() {
+                  let highestIndividualScore = 0;
+                  let highestScoringCharacter = '';
+                
+                  let scores = ballConfigurations.map(config => {
+                    const character = characterNames[Object.keys(colorPalette).find(key => colorPalette[key] === config.color)];
+                    const score = squares.flat().filter(color => color === config.color).length;
+                
+                    if (score > highestIndividualScore) {
+                      highestIndividualScore = score;
+                      highestScoringCharacter = character;
+                    }
+                
+                    return { character, score, color: config.color };
+                  });
+      
+                  // Check for balls to eliminate
+                    scores.forEach(score => {
+                      const ballIndex = balls.findIndex(ball => ball.color === score.color);
+                      if (ballIndex !== -1 && !balls[ballIndex].eliminated && score.score < 200) {
+                          eliminateBall(ballIndex);
+                      }
+                  });
+                          
+                  // Safely update the "On Top" display
+                  const onTopElement = document.getElementById('onTop');
+                  if (onTopElement && highestScoringCharacter) {
+                    onTopElement.textContent = `⭐ ${highestScoringCharacter} (${highestIndividualScore})`;
+                  }
+                
+                  if (highestIndividualScore > highScore) {
+                    updateHighScore(highestIndividualScore, highestScoringCharacter);
+                  }
+                
+                  let scoresHTML = scores.map(score => `<span style="color: ${score.color};">${score.character}: ${score.score}</span>`).join(' | ');
+                  scoreElement.innerHTML = scoresHTML;
+                }          
+      
+          function updateHighScore(newHighScore, highScorerCharacter) {
+                  highScore = newHighScore;
+                  localStorage.setItem(highScoreKey, highScore);
+                  highScoreElement.textContent = `High Score: ${highScore}`;
+                  document.getElementById('highScoreCharacter').textContent = `⭐ ${highScorerCharacter}`;
+                }
+          
+          function displayEndGameNotification(winner) {
+            alert(`${winner} has taken over the board! Game Over.`);
+           
+            location.reload();
+          }    
+          
+          function reassignSquaresOfEliminatedBall(eliminatedColor) {
+            const activeColors = balls.filter(ball => !ball.eliminated).map(ball => ball.color);
+            for (let i = 0; i < numSquaresX; i++) {
+                for (let j = 0; j < numSquaresY; j++) {
+                    if (squares[i][j] === eliminatedColor) {
+                        const randomColor = activeColors[Math.floor(Math.random() * activeColors.length)];
+                        squares[i][j] = randomColor;
+                    }
+                }
             }
-          
-            let scoresHTML = scores.map(score => `<span style="color: ${score.color};">${score.character}: ${score.score}</span>`).join(' | ');
-            scoreElement.innerHTML = scoresHTML;
+        }
+       
+          function eliminateBall(ballIndex) {
+          balls[ballIndex].eliminated = true;
+          reassignSquaresOfEliminatedBall(balls[ballIndex].color);
+          console.log(`Ball ${ballIndex} (Color: ${balls[ballIndex].color}) eliminated.`);
+      
+      }
+         
+          function checkBoundaryCollision(ball) {
+            let dx = ball.dx;
+            let dy = ball.dy;
+        
+            if (ball.x + dx > canvas.width - SQUARE_SIZE / 2 || ball.x + dx < SQUARE_SIZE / 2) {
+              dx = -dx;
+            }
+            if (ball.y + dy > canvas.height - SQUARE_SIZE / 2 || ball.y + dy < SQUARE_SIZE / 2) {
+              dy = -dy;
+            }
+        
+            return { dx: dx, dy: dy };
           }          
-
-    function updateHighScore(newHighScore, highScorerCharacter) {
-            highScore = newHighScore;
+          
+          function limitSpeed(ball) {
+            const maxSpeed = 10; // Maximum speed
+            let speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
+            if (speed > maxSpeed) {
+              ball.dx *= maxSpeed / speed;
+              ball.dy *= maxSpeed / speed;
+            }
+          }              
+          
+          function updateOnTopDisplay() {
+            const highScoreCharacterElement = document.getElementById('highScoreCharacter');
+            if (highScoreCharacterElement) {
+                let currentTopScorer = 'None'; 
+                highScoreCharacterElement.textContent = `⭐ ${currentTopScorer}`;
+            } else {
+                console.error('Element with ID "highScoreCharacter" not found.');
+            }
+        }
+          
+          function resetHighScore() {
+            highScore = 0;
             localStorage.setItem(highScoreKey, highScore);
             highScoreElement.textContent = `High Score: ${highScore}`;
-            document.getElementById('highScoreCharacter').textContent = `⭐ ${highScorerCharacter}`;
-          }
-    
-    function displayEndGameNotification(winner) {
-      alert(`${winner} has taken over the board! Game Over.`);
-      // Implement further end-game logic here
-      location.reload();
-    }    
-    
-    function reassignSquaresOfEliminatedBall(eliminatedColor) {
-      const activeColors = balls.filter(ball => !ball.eliminated).map(ball => ball.color);
-      for (let i = 0; i < numSquaresX; i++) {
-          for (let j = 0; j < numSquaresY; j++) {
-              if (squares[i][j] === eliminatedColor) {
-                  const randomColor = activeColors[Math.floor(Math.random() * activeColors.length)];
-                  squares[i][j] = randomColor;
-              }
-          }
-      }
-  }
- 
-    function eliminateBall(ballIndex) {
-      balls[ballIndex].eliminated = true;
-      reassignSquaresOfEliminatedBall(balls[ballIndex].color);
-      // Any additional logic for when a ball is eliminated
-  }
-   
-    function checkBoundaryCollision(ball) {
-      let dx = ball.dx;
-      let dy = ball.dy;
-  
-      if (ball.x + dx > canvas.width - SQUARE_SIZE / 2 || ball.x + dx < SQUARE_SIZE / 2) {
-        dx = -dx;
-      }
-      if (ball.y + dy > canvas.height - SQUARE_SIZE / 2 || ball.y + dy < SQUARE_SIZE / 2) {
-        dy = -dy;
-      }
-  
-      return { dx: dx, dy: dy };
-    }
-    
-    function limitSpeed(ball) {
-      const maxSpeed = 200; // Set a maximum speed
-      let speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
-      if (speed > maxSpeed) {
-        ball.dx *= maxSpeed / speed;
-        ball.dy *= maxSpeed / speed;
-      }
-    }
-
-    // Initialize high score display on page load
-    window.onload = () => {
-      // Retrieve the high score from localStorage
-      let storedHighScore = localStorage.getItem(highScoreKey);
-      if (storedHighScore) {
-          let highScoreData = JSON.parse(storedHighScore);
-          highScore = highScoreData.score || 0;
-          let highScorerCharacter = highScoreData.character || 'None';
-          highScoreElement.textContent = `High Score: ${highScore} by ${highScorerCharacter}`;
-      } else {
-          highScore = 0;
-          highScoreElement.textContent = 'High Score: 0 by None';
-      }
-  
-      // Call to update the initial "On Top" display
-      updateOnTopDisplay();
-  };
-  
-    function updateOnTopDisplay() {
-      // Assuming the logic to determine the current top scorer
-      // For example, it could be the first character at the start
-      let currentTopScorer = characterNames[Object.keys(colorPalette)[0]] || 'None';
-      document.getElementById('onTop').textContent = `⭐ ${currentTopScorer}`;
-  }
-    function resetHighScore() {
-      highScore = 0;
-      localStorage.setItem(highScoreKey, highScore);
-      highScoreElement.textContent = `High Score: ${highScore}`;
-  }
-  
-  // Event listener for the reset high score link
-      document.getElementById('resetHighScore').addEventListener('click', (e) => {
-          e.preventDefault();
-          resetHighScore();
-      });
-
-
-    function checkGameOver() {
-      const activeBalls = balls.filter(ball => !ball.eliminated);
-      if (activeBalls.length <= 1) {
-        displayGameOver(activeBalls[0]);
-      }
-    }
-
-    function displayGameOver(winningBall) {
-      let winnerCharacter = characterNames[Object.keys(colorPalette).find(key => colorPalette[key] === winningBall.color)];
-      alert(`${winnerCharacter} wins! Game Over.`);
-      // Additional logic to handle the end of the game, like stopping the game loop
-  }
-    
-    function onGameOver() {
-      // Calculate the final score
-      let finalScore = calculateFinalScore(); // Implement this based on your game logic
-      updateHighScore(finalScore);
-      
-      // Other game over logic
-    }
-    
-    function updateBallMovement(ball, config) {
-      let bounce = updateSquareAndBounce(ball, config);
-      ball.dx = bounce.dx;
-      ball.dy = bounce.dy;
-      
-      let boundary = checkBoundaryCollision(ball);
-      ball.dx = boundary.dx;
-      ball.dy = boundary.dy;
-    
-      ball.x += ball.dx;
-      ball.y += ball.dy;
-    }
-    
-    // Game Loop
-    function draw() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      drawSquares();
-    
-    
-      balls.forEach((ball, index) => {
-        if (!ball.eliminated) {
-          const config = ballConfigurations[index];
-          drawBall(ball, config.ballColor);
-    
-          updateBallMovement(ball, config);
         }
-      });
-    
-      updateScoreElement();
-      checkGameOver();
-      requestAnimationFrame(draw); // Continuously loop the game
-    }
+            // Event listener to reset high score
+            document.getElementById('resetHighScore').addEventListener('click', (e) => {
+              e.preventDefault();
+              resetHighScore();
+              });
 
-// Initialization Call
-    highScoreElement.textContent = `High Score: ${highScore}`;
-    spawnPowerUps();
-    requestAnimationFrame(draw);
-  
-  </script>
-  
+          // Initialize high score display on page load
+          window.onload = () => {
+            // Retrieve the high score from localStorage
+            let storedHighScore = localStorage.getItem(highScoreKey);
+            if (storedHighScore) {
+                let highScoreData = JSON.parse(storedHighScore);
+                highScore = highScoreData.score || 0;
+                let highScorerCharacter = highScoreData.character || 'None';
+                highScoreElement.textContent = `High Score: ${highScore} by ${highScorerCharacter}`;
+            } else {
+                highScore = 0;
+                highScoreElement.textContent = 'High Score: 0 by None';
+            }
+        
+            // Call to update the initial "On Top" display
+            updateOnTopDisplay();
+        };
+         
+          function checkGameOver() {
+            const activeBalls = balls.filter(ball => !ball.eliminated);
+            if (activeBalls.length <= 1) {
+              onGameOver();
+            }
+          }
+      
+          function displayGameOver(winningBall) {
+            let winnerCharacter = characterNames[Object.keys(colorPalette).find(key => colorPalette[key] === winningBall.color)];
+            alert(`${winnerCharacter} wins! Game Over.`);
+           
+        }
+          
+          function calculateFinalScore() {
+          let highestScore = 0;
+          ballConfigurations.forEach(config => {
+              const score = squares.flat().filter(color => color === config.color).length;
+              if (score > highestScore) {
+                  highestScore = score;
+              }
+          });
+          return highestScore;
+          }
+      
+          function onGameOver() {
+            
+            let finalScore = calculateFinalScore();
+            updateHighScore(finalScore);
+            alert("Game Over! Final Score: " + finalScore);
+           
+          }
+          
+          function updateBallMovement(ball, config) {
+            let bounce = updateSquareAndBounce(ball, config);
+            ball.dx = bounce.dx;
+            ball.dy = bounce.dy;
+            
+            let boundary = checkBoundaryCollision(ball);
+            ball.dx = boundary.dx;
+            ball.dy = boundary.dy;
+          
+            ball.x += ball.dx;
+            ball.y += ball.dy;
+          }
+          
+          // Game Loop
+          function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawSquares();
+          
+          
+            balls.forEach((ball, index) => {
+              if (!ball.eliminated) {
+                const config = ballConfigurations[index];
+                drawBall(ball, config.ballColor);
+          
+                updateBallMovement(ball, config);
+              }
+            });
+          
+            updateScoreElement();
+            checkGameOver();
+            requestAnimationFrame(draw); 
+          }
+      
+          // Initialization Call         
+          spawnPowerUps();
+          requestAnimationFrame(draw);
+        
+    </script>
+  </body>
 </html>
