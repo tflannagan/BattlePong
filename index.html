@@ -86,32 +86,33 @@
       
       .modal {
         font-family: monospace;
-        position: fixed;
+        position: fixed; 
         z-index: 1;
         left: 0;
         top: 0;
         width: 100%;
         height: 100%;
         overflow: auto;
-        background-color: rgba(0, 0, 0, 0.4); /* Slightly transparent dark overlay */
+        background-color: rgba(0, 0, 0, 0.4); 
         display: flex;
-        align-items: center;
-        justify-content: center;
+        align-items: center !important;
+        justify-content: center !important;
       }
       
       .modal-content {
         
-        background-color: #d9e8e3; /* Light color scheme to match the gradient */
+        background-color: #d9e8e3; 
         padding: 20px;
         border-radius: 4px;
         border: none;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        width: 20%; /* Adjusted for better mobile responsiveness */
-        max-width: 600px; /* Max width set for larger screens */
+        width: 30%; 
+        max-width: 600px; 
+        
       }
       
       .close-button {
-        color: #172b36; /* Dark color for close button to match the score */
+        color: #172b36; 
         float: right;
         font-size: 28px;
         font-weight: bold;
@@ -130,12 +131,13 @@
         color: #172b36;
         text-align: center;
         display: flex;
-  justify-content: center;
-  align-items: center;
+  justify-content: center !important;
+  align-items: center !important;
+  
       }
       
       .modal-body {
-        padding: 20px 0;
+        padding: 20px 1rem;
         color: #172b36;
         text-align: center;
       }
@@ -181,8 +183,8 @@
         <h2>Round Over!</h2>
         <p id="winnerAnnouncement"></p>
         <button id="restartGame">Restart Game</button>
-        <button onclick="location.href='https://www.tyflannagan.tech/'">Donate</button>
-        <button id="openSettings">Settings</button>
+        <button onclick="location.href='https://www.tyflannagan.tech/'">Contact</button>
+        <button id="openSettings">Settings [WIP]</button>
       </div>
     </div>
 
@@ -193,7 +195,7 @@
           <h2>Welcome to BattleBall!</h2>
         </div>
         <div class="modal-body">
-          <p>Get ready another round of BATTLEBALL, an exciting battle to see who will be the last ball standing. Click 'Start Game' to begin!</p>
+          <p>Get ready another round of BATTLEBALL, an exciting battle to see who will be the last ball standing. If a ball falls below 150 squares, it is eliminated. Click 'Start' to begin!</p>
         </div>
         <div class="modal-footer">
           <button id="startGame">Start</button>
@@ -466,9 +468,8 @@
               ball.dy *= maxSpeed / speed;
             }
           }
-          
+           // Display the welcome modal
           window.onload = () => {
-            // Display the welcome modal
             document.getElementById('welcomeModal').style.display = 'block';
           
           };
@@ -483,19 +484,33 @@
 
 
           function showEndGameModal(winnerCharacter) {
-            document.getElementById("winnerAnnouncement").innerText = `${winnerCharacter} wins! What would you like to do next?`;
-            document.getElementById("endGameModal").style.display = "block";
+            const modal = document.getElementById('endGameModal');
+            const winnerAnnouncement = document.getElementById('winnerAnnouncement');
+            const closeButton = document.getElementsByClassName('close-button')[0];
+            const restartButton = document.getElementById('restartGame');
+          
+            if (modal && winnerAnnouncement && closeButton && restartButton) {
+              winnerAnnouncement.textContent = `Winner: ${winnerCharacter}`;
+              modal.style.display = "flex";
+          
+              // Close modal event
+              closeButton.onclick = function() {
+                modal.style.display = "none";
+              };
+          
+              // Restart game event
+              restartButton.onclick = function() {
+                modal.style.display = "none";
+                location.reload(); 
+              };
+
+              window.onclick = function(event) {
+                if (event.target === modal) {
+                  modal.style.display = "none";
+                }
+              };
+            }
           }
-          
-          // Close the modal
-          document.querySelector(".close-button").onclick = function() {
-            document.getElementById("endGameModal").style.display = "none";
-          };
-          
-          // Restart the game
-          document.getElementById("restartGame").onclick = function() {
-            location.reload(); // Simplest way to restart the game
-          };
           
           //Open Settings (WIP)
           document.getElementById("openSettings").onclick = function() {
@@ -524,7 +539,7 @@
               resetHighScore();
               });
 
-          // Initialize high score display on page load
+          // High score display on page load
           window.onload = () => {
             // Retrieve the high score from localStorage
             let storedHighScore = localStorage.getItem(highScoreKey);
@@ -543,22 +558,21 @@
         };
          
           function checkGameOver() {
-            const activeBalls = balls.filter(ball => !ball.eliminated);
-            if (activeBalls.length === 1) {
-                // Call displayGameOver only if there is exactly one ball left
-                displayGameOver(activeBalls[0]);
-            }
-        }
-        
+          const activeBalls = balls.filter(ball => !ball.eliminated);
+          if (activeBalls.length <= 1) {
+            const winningBall = activeBalls.length === 1 ? activeBalls[0] : null;
+            let winnerCharacter = winningBall ? characterNames[Object.keys(colorPalette).find(key => colorPalette[key] === winningBall.color)] : "None";
+            showEndGameModal(winnerCharacter);
+          }
+        }       
         
           function displayGameOver(winningBall) {
-          // Check if winningBall is defined and has a color property
           if (winningBall && winningBall.color) {
-              let winnerCharacter = characterNames[Object.keys(colorPalette).find(key => colorPalette[key] === winningBall.color)];
-              showEndGameModal(winnerCharacter);
+            let winnerCharacter = winningBall ? characterNames[Object.keys(colorPalette).find(key => colorPalette[key] === winningBall.color)] : "None";
+            showEndGameModal(winnerCharacter);
           } else {
               console.error('Error: Winning ball is undefined or does not have a color property.');
-              // Handle the error case appropriately
+             
           }
       }
             
@@ -588,7 +602,7 @@
                   }
               });
           
-              showEndGameModal(winnerCharacter); // Show modal with the winner
+              showEndGameModal(winnerCharacter);
           }
             
           function updateBallMovement(ball, config) {
