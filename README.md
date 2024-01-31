@@ -1,6 +1,6 @@
-# BattlePong 👩‍🚀
+# BattleBall 👩‍🚀
 
-Welcome to BattlePong! This is a web-based simulation that allows you to take part in the exiting world of... BATTLEPONG.
+Welcome to BattleBall! This is a web-based simulation that allows you to take part in the exiting world of... BATTLEBALL!
 
 ## :bulb: About The Project
 
