@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>BattlePong | Ty</title>
-    <!-- <link rel="canonical" href="https://pong-wars.koenvangilst.nl/" /> -->
+    <title>BattleBall | Ty</title>
+    
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
     <link rel="icon" type="image" href="favicon.ico">
     <style>
@@ -82,6 +82,80 @@
       #made a {
         color: #172b36;
       }
+
+      
+      .modal {
+        font-family: monospace;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.4); /* Slightly transparent dark overlay */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      .modal-content {
+        
+        background-color: #d9e8e3; /* Light color scheme to match the gradient */
+        padding: 20px;
+        border-radius: 4px;
+        border: none;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        width: 20%; /* Adjusted for better mobile responsiveness */
+        max-width: 600px; /* Max width set for larger screens */
+      }
+      
+      .close-button {
+        color: #172b36; /* Dark color for close button to match the score */
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+      }
+      
+      .close-button:hover,
+      .close-button:focus {
+        color: #FF6347; /* Hover color for close button */
+        text-decoration: none;
+        cursor: pointer;
+      }
+      
+      .modal-header,
+      .modal-footer {
+        padding: 10px 0;
+        color: #172b36;
+        text-align: center;
+        display: flex;
+  justify-content: center;
+  align-items: center;
+      }
+      
+      .modal-body {
+        padding: 20px 0;
+        color: #172b36;
+        text-align: center;
+      }
+
+      button {
+        display: flex;
+        align-items: center;
+        justify-items: center;
+        justify-content: center;
+        font-family: monospace;
+        padding: 0.5rem 1rem;
+        border-radius: 10px;
+        margin: 0.7rem 0rem;
+      }
+
+      button:hover {
+          color:rgba(255, 255, 255, 0.883);
+          background-color:#172b365a;  
+        }       
+        
     </style>
   </head>
 
@@ -101,6 +175,32 @@
         <a href="https://github.com/tflannagan">github</a>
       </p>
     </div>
+    <div id="endGameModal" class="modal" style="display:none;">
+      <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h2>Round Over!</h2>
+        <p id="winnerAnnouncement"></p>
+        <button id="restartGame">Restart Game</button>
+        <button onclick="location.href='https://www.tyflannagan.tech/'">Donate</button>
+        <button id="openSettings">Settings</button>
+      </div>
+    </div>
+
+    <div id="welcomeModal" class="modal">
+      <div class="modal-content">
+        <span class="close-button" onclick="closeWelcomeModal()">&times;</span>
+        <div class="modal-header">
+          <h2>Welcome to BattleBall!</h2>
+        </div>
+        <div class="modal-body">
+          <p>Get ready another round of BATTLEBALL, an exciting battle to see who will be the last ball standing. Click 'Start Game' to begin!</p>
+        </div>
+        <div class="modal-footer">
+          <button id="startGame">Start</button>
+        </div>
+      </div>
+    </div>
+
     <script>
       // Global Variable Declarations
           const colorPalette = {
@@ -271,53 +371,59 @@
           function updateScoreElement() {
                   let highestIndividualScore = 0;
                   let highestScoringCharacter = '';
-                
-                  let scores = ballConfigurations.map(config => {
-                    const character = characterNames[Object.keys(colorPalette).find(key => colorPalette[key] === config.color)];
-                    const score = squares.flat().filter(color => color === config.color).length;
-                
-                    if (score > highestIndividualScore) {
-                      highestIndividualScore = score;
-                      highestScoringCharacter = character;
-                    }
-                
-                    return { character, score, color: config.color };
+              
+                  let scores = ballConfigurations.map((config, index) => {
+                      const character = characterNames[Object.keys(colorPalette).find(key => colorPalette[key] === config.color)];
+                      const score = squares.flat().filter(color => color === config.color).length;
+              
+                      if (score > highestIndividualScore) {
+                          highestIndividualScore = score;
+                          highestScoringCharacter = character;
+                      }
+              
+                      // Determine if the ball is eliminated
+                      const isEliminated = balls[index].eliminated;
+              
+                      return {
+                          character,
+                          score,
+                          color: config.color,
+                          isEliminated
+                      };
                   });
-      
-                  // Check for balls to eliminate
-                    scores.forEach(score => {
-                      const ballIndex = balls.findIndex(ball => ball.color === score.color);
-                      if (ballIndex !== -1 && !balls[ballIndex].eliminated && score.score < 200) {
-                          eliminateBall(ballIndex);
+              
+                  // Eliminate balls below the threshold
+                  scores.forEach(({ character, score, color }, index) => {
+                      if (!balls[index].eliminated && score < 150) {
+                          eliminateBall(index);
                       }
                   });
-                          
-                  // Safely update the "On Top" display
-                  const onTopElement = document.getElementById('onTop');
-                  if (onTopElement && highestScoringCharacter) {
-                    onTopElement.textContent = `⭐ ${highestScoringCharacter} (${highestIndividualScore})`;
-                  }
-                
+              
+                  // Update the highest score and character
                   if (highestIndividualScore > highScore) {
-                    updateHighScore(highestIndividualScore, highestScoringCharacter);
+                      updateHighScore(highestIndividualScore, highestScoringCharacter);
                   }
-                
-                  let scoresHTML = scores.map(score => `<span style="color: ${score.color};">${score.character}: ${score.score}</span>`).join(' | ');
+              
+                  // Generate and update the scores display
+                  let scoresHTML = scores.map(({ character, score, color, isEliminated }) => {
+                      const style = isEliminated ? 'text-decoration: line-through; color: #888;' : '';
+                      return `<span style="${style} color: ${color};">${character}: ${score}</span>`;
+                  }).join(' | ');
+              
                   scoreElement.innerHTML = scoresHTML;
-                }          
-      
+              
+                  // Update "On Top" display
+                  const onTopElement = document.getElementById('onTop');
+                  if (onTopElement) {
+                      onTopElement.textContent = `⭐ ${highestScoringCharacter} (${highestIndividualScore})`;
+                  }
+              }
           function updateHighScore(newHighScore, highScorerCharacter) {
                   highScore = newHighScore;
                   localStorage.setItem(highScoreKey, highScore);
                   highScoreElement.textContent = `High Score: ${highScore}`;
                   document.getElementById('highScoreCharacter').textContent = `⭐ ${highScorerCharacter}`;
-                }
-          
-          function displayEndGameNotification(winner) {
-            alert(`${winner} has taken over the board! Game Over.`);
-           
-            location.reload();
-          }    
+                }        
           
           function reassignSquaresOfEliminatedBall(eliminatedColor) {
             const activeColors = balls.filter(ball => !ball.eliminated).map(ball => ball.color);
@@ -359,7 +465,43 @@
               ball.dx *= maxSpeed / speed;
               ball.dy *= maxSpeed / speed;
             }
-          }              
+          }
+          
+          window.onload = () => {
+            // Display the welcome modal
+            document.getElementById('welcomeModal').style.display = 'block';
+          
+          };
+          
+          function closeWelcomeModal() {
+            document.getElementById('welcomeModal').style.display = 'none';
+          }
+          
+          document.getElementById('startGame').addEventListener('click', () => {
+            closeWelcomeModal();
+          });
+
+
+          function showEndGameModal(winnerCharacter) {
+            document.getElementById("winnerAnnouncement").innerText = `${winnerCharacter} wins! What would you like to do next?`;
+            document.getElementById("endGameModal").style.display = "block";
+          }
+          
+          // Close the modal
+          document.querySelector(".close-button").onclick = function() {
+            document.getElementById("endGameModal").style.display = "none";
+          };
+          
+          // Restart the game
+          document.getElementById("restartGame").onclick = function() {
+            location.reload(); // Simplest way to restart the game
+          };
+          
+          //Open Settings (WIP)
+          document.getElementById("openSettings").onclick = function() {
+          
+            console.log("Open settings here.");
+          };              
           
           function updateOnTopDisplay() {
             const highScoreCharacterElement = document.getElementById('highScoreCharacter');
@@ -402,70 +544,87 @@
          
           function checkGameOver() {
             const activeBalls = balls.filter(ball => !ball.eliminated);
-            if (activeBalls.length <= 1) {
-              onGameOver();
+            if (activeBalls.length === 1) {
+                // Call displayGameOver only if there is exactly one ball left
+                displayGameOver(activeBalls[0]);
             }
-          }
-      
-          function displayGameOver(winningBall) {
-            let winnerCharacter = characterNames[Object.keys(colorPalette).find(key => colorPalette[key] === winningBall.color)];
-            alert(`${winnerCharacter} wins! Game Over.`);
-           
         }
-          
+        
+        
+          function displayGameOver(winningBall) {
+          // Check if winningBall is defined and has a color property
+          if (winningBall && winningBall.color) {
+              let winnerCharacter = characterNames[Object.keys(colorPalette).find(key => colorPalette[key] === winningBall.color)];
+              showEndGameModal(winnerCharacter);
+          } else {
+              console.error('Error: Winning ball is undefined or does not have a color property.');
+              // Handle the error case appropriately
+          }
+      }
+            
           function calculateFinalScore() {
-          let highestScore = 0;
-          ballConfigurations.forEach(config => {
-              const score = squares.flat().filter(color => color === config.color).length;
-              if (score > highestScore) {
-                  highestScore = score;
-              }
-          });
-          return highestScore;
-          }
-      
-          function onGameOver() {
-            
-            let finalScore = calculateFinalScore();
-            updateHighScore(finalScore);
-            alert("Game Over! Final Score: " + finalScore);
-           
-          }
-          
-          function updateBallMovement(ball, config) {
-            let bounce = updateSquareAndBounce(ball, config);
-            ball.dx = bounce.dx;
-            ball.dy = bounce.dy;
-            
-            let boundary = checkBoundaryCollision(ball);
-            ball.dx = boundary.dx;
-            ball.dy = boundary.dy;
-          
-            ball.x += ball.dx;
-            ball.y += ball.dy;
-          }
-          
-          // Game Loop
-          function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawSquares();
-          
-          
-            balls.forEach((ball, index) => {
-              if (!ball.eliminated) {
-                const config = ballConfigurations[index];
-                drawBall(ball, config.ballColor);
-          
-                updateBallMovement(ball, config);
-              }
+            let highestScore = 0;
+            ballConfigurations.forEach(config => {
+                const score = squares.flat().filter(color => color === config.color).length;
+                if (score > highestScore) {
+                    highestScore = score;
+                }
             });
+            return highestScore;
+            }
+        
+          function onGameOver() {
+              let finalScore = calculateFinalScore();
+              updateHighScore(finalScore);
           
-            updateScoreElement();
-            checkGameOver();
-            requestAnimationFrame(draw); 
+              // Determine the winning character
+              let highestScore = 0;
+              let winnerCharacter = '';
+              ballConfigurations.forEach(config => {
+                  const score = squares.flat().filter(color => color === config.color).length;
+                  if (score > highestScore) {
+                      highestScore = score;
+                      winnerCharacter = characterNames[Object.keys(colorPalette).find(key => colorPalette[key] === config.color)];
+                  }
+              });
+          
+              showEndGameModal(winnerCharacter); // Show modal with the winner
           }
-      
-          // Initialization Call         
+            
+          function updateBallMovement(ball, config) {
+              let bounce = updateSquareAndBounce(ball, config);
+              ball.dx = bounce.dx;
+              ball.dy = bounce.dy;
+              
+              let boundary = checkBoundaryCollision(ball);
+              ball.dx = boundary.dx;
+              ball.dy = boundary.dy;
+            
+              ball.x += ball.dx;
+              ball.y += ball.dy;
+            }
+            
+            // Game Loop
+          function draw() {
+              ctx.clearRect(0, 0, canvas.width, canvas.height);
+              drawSquares();
+            
+            
+              balls.forEach((ball, index) => {
+                if (!ball.eliminated) {
+                  const config = ballConfigurations[index];
+                  drawBall(ball, config.ballColor);
+            
+                  updateBallMovement(ball, config);
+                }
+              });
+            
+              updateScoreElement();
+              checkGameOver();
+              requestAnimationFrame(draw); 
+            }
+        
+            // Initialization Call         
           spawnPowerUps();
           requestAnimationFrame(draw);
         
