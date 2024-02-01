@@ -162,6 +162,7 @@
   </head>
 
   <body>
+    
     <div id="container">
       <canvas id="pongCanvas" width="800" height="800"></canvas>
       <div id="score"></div>
@@ -177,6 +178,7 @@
         <a href="https://github.com/tflannagan">github</a>
       </p>
     </div>
+    
     <div id="endGameModal" class="modal" style="display:none;">
       <div class="modal-content">
         <span class="close-button">&times;</span>
@@ -204,7 +206,7 @@
     </div>
 
     <script>
-      // Global Variable Declarations
+          // Global Variable Declarations
           const colorPalette = {
             ArcticPowder: "#F1F6F4",
             MysticMint: "#D9E8E3",
@@ -220,12 +222,12 @@
             ArcticPowder: "Neo",
             MysticMint: "Vega",
             Forsythia: "Blade",
-            DeepSaffron: "Cypher",
+            DeepSaffron: "Zion",
             NocturnalExpedition: "Astra",
-            OceanicNoir: "Zion",
-            Crimson: "Raven",
+            OceanicNoir: "Cypher",
+            Crimson: "Leon",
             CobaltBlue: "Echo",
-            Breeze: "Leon"
+            Breeze: "Raven"
           };
           const powerUps = {
             speedUp: { effect: 'speedUp', color: '#FFD700' },
@@ -251,10 +253,9 @@
           const numSquaresX = canvas.width / SQUARE_SIZE;
           const numSquaresY = canvas.height / SQUARE_SIZE;
           
-          let squares = [];
-        
+          let squares = [];        
           // Initialize squares with equal distribution
-          for (let i = 0; i < numSquaresX; i++) {
+        for (let i = 0; i < numSquaresX; i++) {
           squares[i] = [];
           for (let j = 0; j < numSquaresY; j++) {
             const index = Math.floor((i / numSquaresX) * ballConfigurations.length);
@@ -262,24 +263,41 @@
           }
         }
         
-          let balls = [
-          { x: canvas.width / 4, y: canvas.height / 2, dx: 12.5, dy: -12.5, speedUpTimeout: null, mass: 1 },
-          { x: (canvas.width / 4) * 3, y: canvas.height / 2, dx: -12.5, dy: 12.5, speedUpTimeout: null, mass: 1 },
-          { x: canvas.width / 2, y: canvas.height / 4, dx: 10, dy: 10, speedUpTimeout: null, mass: 1 },
-          { x: canvas.width / 2, y: (canvas.height / 4) * 3, dx: -10, dy: -10, speedUpTimeout: null, mass: 1 }
-        ];
+        let balls = [];
+        // Randomly distribute spawn locations
+        for (let i = 0; i < 4; i++) {
+            let startX = randomNum(SQUARE_SIZE * 2, canvas.width - SQUARE_SIZE * 2);
+            let startY = randomNum(SQUARE_SIZE * 2, canvas.height - SQUARE_SIZE * 2);
+            let startDx = randomNum(-10, 10);
+            let startDy = randomNum(-10, 10);
+        
+            // Ensure that the ball is moving in both x and y directions
+            if (startDx === 0) startDx = 5;
+            if (startDy === 0) startDy = 5;
+        
+            balls.push({
+                x: startX,
+                y: startY,
+                dx: startDx,
+                dy: startDy,
+                speedUpTimeout: null,
+                mass: 1,
+                eliminated: false
+            });
+        }
           
-          let powerUpLocations = [];
-      
-      // Utility Functions
+
+          // Utility Functions
           function randomNum(min, max) {
         return Math.random() * (max - min) + min;
       }
+          
+          let powerUpLocations = [];
       
-      // Core Game Functions
+          // Core Game Functions
           function spawnPowerUps() {
             powerUpLocations = []; // Clear existing power-ups
-          for (let i = 0; i < 15; i++) { // Spawn 10 power-ups
+          for (let i = 0; i < 1; i++) { // Spawn 10 power-ups
           const powerUpType = Object.keys(powerUps)[Math.floor(Math.random() * Object.keys(powerUps).length)];
           const x = Math.floor(Math.random() * numSquaresX) * SQUARE_SIZE;
           const y = Math.floor(Math.random() * numSquaresY) * SQUARE_SIZE;
@@ -298,8 +316,8 @@
                 const originalColor = ball.ballColor; // Store the original ball color
           
                 // Increase speed
-                ball.dx *= 2.5;
-                ball.dy *= 2.5;
+                ball.dx *= 1.5;
+                ball.dy *= 1.5;
           
                 // Temporarily change the ball's color to visually indicate the power-up
                 ball.ballColor = '#FFD700';
@@ -334,41 +352,45 @@
           function updateSquareAndBounce(ball, config) {
             let updatedDx = ball.dx;
             let updatedDy = ball.dy;
-        
+          
             for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 4) {
               let checkX = ball.x + Math.cos(angle) * (SQUARE_SIZE / 2);
               let checkY = ball.y + Math.sin(angle) * (SQUARE_SIZE / 2);
-        
+          
               let i = Math.floor(checkX / SQUARE_SIZE);
               let j = Math.floor(checkY / SQUARE_SIZE);
-        
+          
               if (i >= 0 && i < numSquaresX && j >= 0 && j < numSquaresY) {
                 if (squares[i][j] !== config.color) {
-                  
                   squares[i][j] = config.color;
-      
-                 
-        
+          
+                  // Introduce a slight randomness to the bounce
+                  let randomBounceFactor = randomNum(-0.5, 0.5);
+          
                   if (Math.abs(Math.cos(angle)) > Math.abs(Math.sin(angle))) {
-                    updatedDx = -updatedDx;
+                    updatedDx = -updatedDx + randomBounceFactor;
                   } else {
-                    updatedDy = -updatedDy;
+                    updatedDy = -updatedDy + randomBounceFactor;
                   }
-        
-                  updatedDx += randomNum(-0.01, 0.01);
-                  updatedDy += randomNum(-0.01, 0.01);
+          
+                  // Ensure the ball doesn't slow down too much
+                  if (Math.abs(updatedDx) < 5) updatedDx = (updatedDx < 0 ? -1 : 1) * 5;
+                  if (Math.abs(updatedDy) < 5) updatedDy = (updatedDy < 0 ? -1 : 1) * 5;
                 }
               }
             }
-                  // Check for collision with invisible power-ups
-                  powerUpLocations.forEach((powerUp, index) => {
-                    if (Math.hypot(ball.x - powerUp.x, ball.y - powerUp.y) < SQUARE_SIZE / 2) {
-                      applyPowerUpEffect(ball, powerUp.type.effect);
-                      powerUpLocations.splice(index, 1); // Remove power-up after activation
-                    }
-                  });
-                      return { dx: updatedDx, dy: updatedDy };
-                }
+          
+            // Check for collision with invisible power-ups
+            powerUpLocations.forEach((powerUp, index) => {
+              if (Math.hypot(ball.x - powerUp.x, ball.y - powerUp.y) < SQUARE_SIZE / 2) {
+                applyPowerUpEffect(ball, powerUp.type.effect);
+                powerUpLocations.splice(index, 1); // Remove the power-up after activation
+              }
+            });
+          
+            return { dx: updatedDx, dy: updatedDy };
+          }
+          
           
           function updateScoreElement() {
                   let highestIndividualScore = 0;
@@ -420,6 +442,25 @@
                       onTopElement.textContent = `⭐ ${highestScoringCharacter} (${highestIndividualScore})`;
                   }
               }
+          
+              function updateBallMovement(ball, config) {
+                let bounce = updateSquareAndBounce(ball, config);
+                ball.dx = bounce.dx;
+                ball.dy = bounce.dy;
+                
+                let boundary = checkBoundaryCollision(ball);
+                ball.dx = boundary.dx;
+                ball.dy = boundary.dy;
+                
+                  // Apply friction 
+                const friction = 0.9999; //Adjust closer to 1 for less friction
+                ball.dx *= friction;
+                ball.dy *= friction;  
+
+                ball.x += ball.dx;
+                ball.y += ball.dy;
+              }
+
           function updateHighScore(newHighScore, highScorerCharacter) {
                   highScore = newHighScore;
                   localStorage.setItem(highScoreKey, highScore);
@@ -460,18 +501,11 @@
             return { dx: dx, dy: dy };
           }          
           
-          function limitSpeed(ball) {
-            const maxSpeed = 10; // Maximum speed
-            let speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
-            if (speed > maxSpeed) {
-              ball.dx *= maxSpeed / speed;
-              ball.dy *= maxSpeed / speed;
-            }
-          }
+         
            // Display the welcome modal
           window.onload = () => {
             document.getElementById('welcomeModal').style.display = 'block';
-          
+
           };
           
           function closeWelcomeModal() {
@@ -481,7 +515,6 @@
           document.getElementById('startGame').addEventListener('click', () => {
             closeWelcomeModal();
           });
-
 
           function showEndGameModal(winnerCharacter) {
             const modal = document.getElementById('endGameModal');
@@ -605,18 +638,7 @@
               showEndGameModal(winnerCharacter);
           }
             
-          function updateBallMovement(ball, config) {
-              let bounce = updateSquareAndBounce(ball, config);
-              ball.dx = bounce.dx;
-              ball.dy = bounce.dy;
-              
-              let boundary = checkBoundaryCollision(ball);
-              ball.dx = boundary.dx;
-              ball.dy = boundary.dy;
-            
-              ball.x += ball.dx;
-              ball.y += ball.dy;
-            }
+          
             
             // Game Loop
           function draw() {
