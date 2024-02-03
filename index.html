@@ -249,23 +249,23 @@
           let highScore = parseInt(localStorage.getItem(highScoreKey)) || 0;
           const highScoreElement = document.getElementById('highScore');
         
-          const SQUARE_SIZE = 25;
+          const SQUARE_SIZE = 20;
           const numSquaresX = canvas.width / SQUARE_SIZE;
           const numSquaresY = canvas.height / SQUARE_SIZE;
           
           let squares = [];        
           // Initialize squares with equal distribution
-        for (let i = 0; i < numSquaresX; i++) {
-          squares[i] = [];
-          for (let j = 0; j < numSquaresY; j++) {
-            const index = Math.floor((i / numSquaresX) * ballConfigurations.length);
-            squares[i][j] = ballConfigurations[index].color;
+          for (let i = 0; i < numSquaresX; i++) {
+            squares[i] = [];
+            for (let j = 0; j < numSquaresY; j++) {
+              const index = Math.floor((i / numSquaresX) * ballConfigurations.length);
+              squares[i][j] = ballConfigurations[index].color;
+            }
           }
-        }
-        
-        let balls = [];
-        // Randomly distribute spawn locations
-        for (let i = 0; i < 4; i++) {
+          
+          let balls = [];
+          // Randomly distribute spawn locations
+          for (let i = 0; i < 4; i++) {
             let startX = randomNum(SQUARE_SIZE * 2, canvas.width - SQUARE_SIZE * 2);
             let startY = randomNum(SQUARE_SIZE * 2, canvas.height - SQUARE_SIZE * 2);
             let startDx = randomNum(-10, 10);
